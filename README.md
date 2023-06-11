@@ -10,7 +10,7 @@ npm install
 Edit file .env
 
 ```bash
-prisma migrate dev
+npx prisma migrate dev
 ```
 
 Run the development server:
