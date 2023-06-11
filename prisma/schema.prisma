@@ -27,6 +27,3 @@ model Position {
   pegawai Pegawai[]
 }
 
-type PegawaiPosition {
-  id: number
-}

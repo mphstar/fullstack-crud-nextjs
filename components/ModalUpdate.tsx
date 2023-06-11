@@ -1,23 +1,33 @@
 "use client"
 
-import { SyntheticEvent, useState } from "react"
+import { SyntheticEvent, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Swal from 'sweetalert2'
-import { Position } from "@prisma/client"
+import { Pegawai, Position } from "@prisma/client"
+import { pegawaiPosition } from "./../app/data-diri/interfacePegawai"
+
 
 export const revalidate = 0
 
-const Modal = ({ dataP }: { dataP: Position[] }) => {
+const Modal = ({ dataP, dataSelected }: { dataP: Position[], dataSelected: pegawaiPosition }) => {
     const [isShowDialog, setIsShowDialog] = useState(false)
 
-    const [name, setName] = useState("")
-    const [job, setJob] = useState("")
-    const [position, setPosition] = useState("")
-    const [favcolor, setFavcolor] = useState("")
+    const [name, setName] = useState(dataSelected.name)
+    const [job, setJob] = useState(dataSelected.job)
+    const [position, setPosition] = useState(dataSelected.positionId)
+    const [favcolor, setFavcolor] = useState(dataSelected.favcolor)
 
     const router = useRouter()
 
+    useEffect(() => {
+        setName(dataSelected.name)
+        setJob(dataSelected.job)
+        setPosition(dataSelected.positionId)
+        setFavcolor(dataSelected.favcolor)
+    }, [isShowDialog])
+
     const handleDialog = () => {
+
         setIsShowDialog(!isShowDialog)
     }
 
@@ -29,7 +39,7 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
             error = "Nama wajib diisi"
         } else if (job == "") {
             error = "Job wajib diisi"
-        } else if (position == "") {
+        } else if (position == null) {
             error = "Position wajib diisi"
         } else if (favcolor == "") {
             error = "Favcolor wajib diisi"
@@ -38,7 +48,7 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
         if (error == "") {
             Swal.fire({
                 title: 'Are you sure?',
-                text: "Apakah anda yakin ingin menambahkan data",
+                text: "Apakah anda yakin ingin mengubah data",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -46,9 +56,10 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
                 confirmButtonText: 'Ya'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    await fetch('/api/data-diri/create', {
+                    await fetch('/api/data-diri/update', {
                         method: 'POST',
                         body: JSON.stringify({
+                            "id": dataSelected.id,
                             "name": name,
                             "job": job,
                             "positionId": Number(position),
@@ -59,14 +70,10 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
 
                         Swal.fire(
                             'Berhasil',
-                            'Berhasil menambahkan data',
+                            'Berhasil mengubah data',
                             'success'
                         ).then(() => {
-                            setName("")
-                            setJob("")
-                            setPosition("")
-                            setFavcolor("")
-    
+
                             router.refresh()
                             handleDialog()
                         })
@@ -86,10 +93,10 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
 
     return (
         <>
-            <button onClick={handleDialog} className="btn btn-success w-full">Add Data</button>
+            <button onClick={handleDialog} className="btn btn-info w-fit">Edit</button>
             <dialog className={isShowDialog ? 'modal modal-open' : 'modal'}>
-                <form method="dialog" className="modal-box">
-                    <h3 className="font-bold text-lg">Tambah Data</h3>
+                <form method="dialog" className="modal-box text-base font-normal">
+                    <h3 className="font-bold text-lg">Ubah Data</h3>
                     <div className="py-4">
                         <div className="form-control w-full">
                             <label className="label">
@@ -107,8 +114,7 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
                             <label className="label">
                                 <span className="label-text">Position</span>
                             </label>
-                            <select value={position} onChange={(e) => setPosition(e.target.value)} className="select select-bordered">
-                                <option value="" disabled>Pilih posisi</option>
+                            <select value={position} onChange={(e) => setPosition(Number(e.target.value))} className="select select-bordered">
                                 {dataP.map((item, index) => {
                                     return (
                                         <option key={item.id} value={item.id}>{item.name}</option>
@@ -120,7 +126,7 @@ const Modal = ({ dataP }: { dataP: Position[] }) => {
                             <label className="label">
                                 <span className="label-text">Favorite Color</span>
                             </label>
-                            <input type="text" value={favcolor} onChange={(e) => setFavcolor(e.target.value)} placeholder="Input your Favorite Colour" className="input input-bordered w-full" />
+                            <input type="text" value={String(favcolor)} onChange={(e) => setFavcolor(e.target.value)} placeholder="Input your Favorite Colour" className="input input-bordered w-full" />
                         </div>
                     </div>
                     <div className="modal-action">

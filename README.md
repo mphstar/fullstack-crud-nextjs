@@ -2,7 +2,18 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+Configure:
+
+```bash
+npm install
+```
+Edit file .env
+
+```bash
+prisma migrate dev
+```
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -12,7 +23,7 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/data-diri](http://localhost:3000/data-diri) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
